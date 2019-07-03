@@ -1,0 +1,26 @@
+# Gopkg.toml
+#
+# Refer to https://golang.github.io/dep/docs/Gopkg.toml.html
+# for detailed Gopkg.toml documentation.
+#
+# required = [""]
+# ignored = [""]
+
+## Hashids
+[[constraint]]
+  name = "github.com/speps/go-hashids"
+  branch = "master"
+
+## Logging Tool
+#[[constraint]]
+#  name = "github.com/golang/glog"
+#  branch = "master"
+
+## gin
+#[[constraint]]
+#  name = "github.com/gin-gonic/gin"
+#  branch = "master"
+
+[prune]
+  go-tests = true
+  unused-packages = true

@@ -1,0 +1,18 @@
+# Ignore vendor Folder.
+vendor/
+
+# Ignore the SQLite database.
+/db/*.sqlite3
+/db/*.sqlite3-journal
+
+# Ignore other unneeded files.
+*.swp
+*~
+.project
+.DS_Store
+.idea
+.secret
+
+# Ignore Test Build Execution File.
+main
+
