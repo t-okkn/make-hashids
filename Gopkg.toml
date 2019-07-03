@@ -17,9 +17,9 @@
 #  branch = "master"
 
 ## gin
-#[[constraint]]
-#  name = "github.com/gin-gonic/gin"
-#  branch = "master"
+[[constraint]]
+  name = "github.com/gin-gonic/gin"
+  branch = "master"
 
 [prune]
   go-tests = true
