@@ -39,9 +39,8 @@ func Str2Uints(input string) []uint32 {
 // summary => Hashidsを作成します
 // param::input => Hashidsを作成する値
 // return::string => Hashids
-// return::string => 使用したSalt
 /////////////////////////////////////////
-func CreateHashids(input []uint32) (string, string) {
+func CreateHashids(input []uint32) string {
 	ut := time.Now().Unix()
 
 	d := hashids.NewData()
@@ -55,7 +54,7 @@ func CreateHashids(input []uint32) (string, string) {
 	hid, _ := hashids.NewWithData(d)
 	res, _ := hid.EncodeInt64(num)
 
-	return res, d.Salt
+	return res
 }
 
 // summary => [Private] uint32のスライスのすべての値を足し合わせます
@@ -79,6 +78,7 @@ func sumUint32(input []uint32) *int64 {
 /////////////////////////////////////////
 func getSaltInt64(input *int64) string {
 	str := strconv.FormatInt(*input, 10)
+	// hash := sha256.Sum256([]byte(str))
 	hash := sha256.Sum256(*(*[]byte)(unsafe.Pointer(&str)))
 
 	return hex.EncodeToString(hash[:])

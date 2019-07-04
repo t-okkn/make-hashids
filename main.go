@@ -32,7 +32,6 @@ func getSingleHashids(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"string": "",
 			"hashids": "",
-			"salt": "",
 			"error": "文字列が読み取れませんでした。",
 		})
 
@@ -43,12 +42,11 @@ func getSingleHashids(c *gin.Context) {
 	fmt.Printf("最大値:%d\n", max)
 	if max <= 4096 && len([]rune(str)) <= max {
 		t := Str2Uints(str)
-		hash, salt := CreateHashids(t)
+		hash := CreateHashids(t)
 
 		c.JSON(http.StatusOK, gin.H{
 			"string": str,
 			"hashids": hash,
-			"salt": salt,
 			"error": "",
 		})
 
@@ -57,7 +55,6 @@ func getSingleHashids(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"string": str,
 				"hashids": "",
-				"salt": "",
 				"error": "文字列長の最大値は4096以下で指定してください。",
 			})
 
@@ -67,7 +64,6 @@ func getSingleHashids(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"string": str,
 				"hashids": "",
-				"salt": "",
 				"error": errstr,
 			})
 		}
