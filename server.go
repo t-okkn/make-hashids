@@ -42,7 +42,7 @@ func getSingleHashids(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 
 		res = nil
-		return
+		c.Abort()
 	}
 
 	res[0] = getResponse(&max, str)
@@ -73,7 +73,7 @@ func getMultiHashids(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, t)
 
 		t = nil
-		return
+		c.Abort()
 	}
 
 	res := make([]HashSet, len(strs))

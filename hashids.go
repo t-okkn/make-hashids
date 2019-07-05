@@ -11,6 +11,11 @@ import (
 	"unsafe"
 )
 
+const (
+	ALPHABET string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	MIN_LENGTH int = 8
+)
+
 // summary => 文字列を一文字ずつ数値に変換します
 // param::input => 変換する入力値
 // return::[]uint32 => inputに対する変換後の数値
@@ -44,8 +49,8 @@ func CreateHashids(input []uint32) string {
 	ut := time.Now().Unix()
 
 	d := hashids.NewData()
-	d.Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	d.MinLength = 8
+	d.Alphabet = ALPHABET
+	d.MinLength = MIN_LENGTH
 	d.Salt = getSaltInt64(&ut)
 
 	num := make([]int64, 1)
