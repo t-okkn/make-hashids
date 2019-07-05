@@ -1,6 +1,9 @@
 # Ignore vendor Folder.
 vendor/
 
+# Ignore bin Folder.
+bin/
+
 # Ignore the SQLite database.
 /db/*.sqlite3
 /db/*.sqlite3-journal
@@ -12,7 +15,4 @@ vendor/
 .DS_Store
 .idea
 .secret
-
-# Ignore Test Build Execution File.
-main
 

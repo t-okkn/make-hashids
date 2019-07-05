@@ -1,9 +1,11 @@
 package main
 
+import "nginx/unit"
+
 // summary => main関数（サーバを開始します）
 /////////////////////////////////////////
 func main() {
-	// http.ListenAndServe(":8080", SetupRouter())
-	SetupRouter().Run()
+	unit.ListenAndServe(":8501", SetupRouter())
+	// SetupRouter().Run()
 }
 
