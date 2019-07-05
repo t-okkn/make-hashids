@@ -8,17 +8,31 @@ import (
 )
 
 const (
+	// POST時の要求コンテンツの上限値
 	LIMIT_CONTENTS int = 1000
+
+	// 変換元文字列長の最大値の上限値
 	LIMIT_MAX int = 4096
+
+	// デフォルトの変換元文字列長の最大値
 	DEFAULT_MAX int = 256
 )
 
+// summary => Response内容について定義した構造体
+// param::Error => エラー内容
+// param::Hashids => Hashids
+// param::Source => 変換元の文字列
+/////////////////////////////////////////
 type HashSet struct {
 	Error   string `json:"Error"`
 	Hashids string `json:"Hashids"`
 	Source  string `json:"Source"`
 }
 
+// summary => 待ち受けるサーバのルーターを定義します
+// return::*gin.Engine =>
+// remark => httpHandlerを受け取る関数にそのまま渡せる
+/////////////////////////////////////////
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
 
@@ -30,6 +44,9 @@ func SetupRouter() *gin.Engine {
 	 return router
 }
 
+// summary => 単一の要求に対してレスポンスを返します
+// param::c => [p] gin.Context構造体
+/////////////////////////////////////////
 func getSingleHashids(c *gin.Context) {
 	maxprm := c.Param("max")
 	max := *getMaxValue(maxprm)
@@ -37,6 +54,7 @@ func getSingleHashids(c *gin.Context) {
 	res := make([]HashSet, 1)
 	str := c.DefaultQuery("string", "")
 
+	// 単一要求時はエラーがあれば400とする
 	if str == "" {
 		res[0].Error = "文字列が読み取れませんでした。"
 		c.JSON(http.StatusBadRequest, res)
@@ -45,7 +63,7 @@ func getSingleHashids(c *gin.Context) {
 		c.Abort()
 	}
 
-	res[0] = getResponse(&max, str)
+	res[0] = *getResponse(&max, str)
 	if res[0].Error == "" {
 		c.JSON(http.StatusOK, res)
 	} else {
@@ -55,6 +73,9 @@ func getSingleHashids(c *gin.Context) {
 	res = nil
 }
 
+// summary => 複数の要求に対してレスポンスを返します
+// param::c => [p] gin.Context構造体
+/////////////////////////////////////////
 func getMultiHashids(c *gin.Context) {
 	maxprm := c.Param("max")
 	max := *getMaxValue(maxprm)
@@ -78,43 +99,60 @@ func getMultiHashids(c *gin.Context) {
 
 	res := make([]HashSet, len(strs))
 	for i, str := range strs {
-		res[i] = getResponse(&max, str)
+		res[i] = *getResponse(&max, str)
 	}
 
+	// 複数要求時はエラーがあっても200で返す
 	c.JSON(http.StatusOK, res)
 	res = nil
 }
 
+// summary => 変換元文字列長の最大値を導出します
+// param::maxStr => Paramからの流入値
+// return::string => 最大値
+/////////////////////////////////////////
 func getMaxValue(maxStr string) *int {
 	max, err := strconv.Atoi(maxStr)
 
+	// 変換に失敗 OR :maxのパラメータが存在しない場合、デフォルト値
 	if err != nil {
 		max = DEFAULT_MAX
 		return &max
 	}
 
 	if max < 1 {
+		// 0以下の数値が入っている場合、デフォルト値
 		max = DEFAULT_MAX
+
 	} else if max > LIMIT_MAX {
+		// 上限値より大きい値が入っている場合、強制的に上限値
 		max = LIMIT_MAX
 	}
-
+	
+	// 基本的に変換元文字列長の最大値の指定自由度は低い
 	return &max
 }
 
-func getResponse(max *int, input string) HashSet {
+// summary => レスポンスとして返す構造体を生成します
+// param::max => [p] 最大値を示すポインタ
+// param::input => 変換元の文字列
+// return::*HashSet => [p] レスポンス用のHashSet構造体
+/////////////////////////////////////////
+func getResponse(max *int, input string) *HashSet {
 	res := HashSet{}
 	res.Source = input
 
+	// max「以下」か（境界値バグテストしっかり）
 	if len([]rune(input)) <= *max {
+		// Hashids生成
 		t := Str2Uints(input)
 		res.Hashids = CreateHashids(t)
 
 	} else {
-		tmp := "%d文字以上の文字列が指定されています。"
+		tmp := "%d文字を超えた文字列が指定されています。"
 		res.Error = fmt.Sprintf(tmp, *max)
 	}
 
-	return res
+	return &res
 }
 

@@ -12,7 +12,10 @@ import (
 )
 
 const (
+	// Hashidsに使用する文字列
 	ALPHABET string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	// Hashidsの最低文字列長
 	MIN_LENGTH int = 8
 )
 
@@ -24,6 +27,7 @@ func Str2Uints(input string) []uint32 {
 	res := make([]uint32, len([]rune(input)))
 	count := 0
 
+	// 各文字をbyteスライスに変換
 	for _, val := range input {
 		chr := []byte(string(val))
 		length := len(chr)
@@ -34,6 +38,7 @@ func Str2Uints(input string) []uint32 {
 			}
 		}
 
+		// byteスライスをUint32に変換
 		res[count] = binary.LittleEndian.Uint32(chr)
 		count += 1
 	}
@@ -62,7 +67,7 @@ func CreateHashids(input []uint32) string {
 	return res
 }
 
-// summary => [Private] uint32のスライスのすべての値を足し合わせます
+// summary => uint32のスライスのすべての値を足し合わせます
 // param::input => 足し合わせるスライス
 // return::*int64 => [p] 合計値
 /////////////////////////////////////////
@@ -76,7 +81,7 @@ func sumUint32(input []uint32) *int64 {
 	return &total
 }
 
-// summary => [Private] Int64の入力値に対するSha256を文字列で導出します
+// summary => Int64の入力値に対するSha256を文字列で導出します
 // param::input => [p] Int64の入力値
 // return::string => Sha256文字列
 // remark => unsafe使用
