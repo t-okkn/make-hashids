@@ -51,7 +51,7 @@ func Str2Uints(input string) []uint32 {
 // return::string => Hashids
 /////////////////////////////////////////
 func CreateHashids(input []uint32) string {
-	ut := time.Now().UnixNano()
+	ut := time.Now().UnixNano() / int64(time.Microsecond)
 
 	d := hashids.NewData()
 	d.Alphabet = ALPHABET
