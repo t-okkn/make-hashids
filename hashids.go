@@ -13,7 +13,7 @@ import (
 
 const (
 	// Hashidsに使用する文字列
-	ALPHABET string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	ALPHABET string = "ABCDEFGHJKLMNPQRSTUVWXY0123456789"
 
 	// Hashidsの最低文字列長
 	MIN_LENGTH int = 8
