@@ -8,12 +8,18 @@ USER    := http
 GROUP   := http
 LDFLAGS := -ldflags="-s -w -X \"main.Version=$(VERSION)\" -X \"main.Revision=$(REVISION)\" -extldflags \"-static\""
 
+GOVER     := $(shell go version | awk '{ print substr($$3, 3) }' | tr "." " ")
+VER_JUDGE := $(shell if [ $(word 1,$(GOVER)) -eq 1 ] && [ $(word 2,$(GOVER)) -le 10 ]; then echo 0; else echo 1; fi)
+
 run:
 	go run *.go
 
-.PHONY: dep
-dep:
-	dep ensure
+init:
+ifeq ($(VER_JUDGE),1)
+	go mod init
+else
+	echo "Packageの取得は手動で行ってください"
+endif
 
 build: $(SRCS)
 	go build -a -tags netgo -installsuffix netgo $(LDFLAGS) -o bin/$(NAME)
