@@ -32,7 +32,7 @@ uninstall: revoke_service
 	rm -f $(DSTDIR)/$(NAME)
 
 create_service:
-	echo -e "[Unit]\nDescription = $(NAME)(Golang App)\n\n[Service]\nEnvironment = \"GIN_MODE=release\"\nWorkingDirectory = $(DSTDIR)/\n\nExecStart = $(DSTDIR)/$(NAME)\nExecStop = /bin/kill -HUP $MAINPID\nExecReload = /bin/kill -HUP $MAINPID && $(DSTDIR)/$(NAME)\n\nRestart = always\nType = simple\n\n[Install]\nWantedBy = multi-user.target" | sudo tee /etc/systemd/system/$(NAME).service
+	echo -e "[Unit]\nDescription=$(NAME)(Golang App)\n\n[Service]\nEnvironment=\"GIN_MODE=release\"\nWorkingDirectory=$(DSTDIR)/\n\nExecStart=$(DSTDIR)/$(NAME)\nExecStop=/bin/kill -HUP $MAINPID\nExecReload=/bin/kill -HUP $MAINPID && $(DSTDIR)/$(NAME)\n\nRestart=always\nType=simple\nUser=$(USER)\nGroup=$(GROUP)\n\n[Install]\nWantedBy=multi-user.target" | tee /etc/systemd/system/$(NAME).service
 	systemctl enable $(NAME)
 
 revoke_service: /etc/systemd/system/$(NAME).service
