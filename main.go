@@ -18,7 +18,7 @@ var (
 func main() {
 	flag.Parse()
 
-	if flag.Arg(0) == "version" || flag.Arg(0) == "--version" {
+	if flag.Arg(0) == "version" {
 		fmt.Println(Version, Revision)
 		return
 	}
