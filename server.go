@@ -49,7 +49,7 @@ func SetupRouter() *gin.Engine {
 /////////////////////////////////////////
 func getSingleHashids(c *gin.Context) {
 	maxprm := c.Param("max")
-	max := *getMaxValue(maxprm)
+	max := getMaxValue(maxprm)
 
 	res := make([]HashSet, 1)
 	str := c.DefaultQuery("string", "")
@@ -64,7 +64,7 @@ func getSingleHashids(c *gin.Context) {
 		return
 	}
 
-	res[0] = *getResponse(&max, str)
+	res[0] = getResponse(max, str)
 	if res[0].Error == "" {
 		c.JSON(http.StatusOK, res)
 	} else {
@@ -79,7 +79,7 @@ func getSingleHashids(c *gin.Context) {
 /////////////////////////////////////////
 func getMultiHashids(c *gin.Context) {
 	maxprm := c.Param("max")
-	max := *getMaxValue(maxprm)
+	max := getMaxValue(maxprm)
 
 	strs := c.PostFormArray("strings[]")
 	if len(strs) < 1 || len(strs) > LIMIT_CONTENTS {
@@ -101,7 +101,7 @@ func getMultiHashids(c *gin.Context) {
 
 	res := make([]HashSet, len(strs))
 	for i, str := range strs {
-		res[i] = *getResponse(&max, str)
+		res[i] = getResponse(max, str)
 	}
 
 	// 複数要求時はエラーがあっても200で返す
@@ -113,13 +113,13 @@ func getMultiHashids(c *gin.Context) {
 // param::maxStr => Paramからの流入値
 // return::string => 最大値
 /////////////////////////////////////////
-func getMaxValue(maxStr string) *int {
+func getMaxValue(maxStr string) int {
 	max, err := strconv.Atoi(maxStr)
 
 	// 変換に失敗 OR :maxのパラメータが存在しない場合、デフォルト値
 	if err != nil {
 		max = DEFAULT_MAX
-		return &max
+		return max
 	}
 
 	if max < 1 {
@@ -132,7 +132,7 @@ func getMaxValue(maxStr string) *int {
 	}
 	
 	// 基本的に変換元文字列長の最大値の指定自由度は低い
-	return &max
+	return max
 }
 
 // summary => レスポンスとして返す構造体を生成します
@@ -140,21 +140,21 @@ func getMaxValue(maxStr string) *int {
 // param::input => 変換元の文字列
 // return::*HashSet => [p] レスポンス用のHashSet構造体
 /////////////////////////////////////////
-func getResponse(max *int, input string) *HashSet {
+func getResponse(max int, input string) HashSet {
 	res := HashSet{}
 	res.Source = input
 
 	// max「以下」か（境界値バグテストしっかり）
-	if len([]rune(input)) <= *max {
+	if len([]rune(input)) <= max {
 		// Hashids生成
 		t := Str2Uints(input)
 		res.Hashids = CreateHashids(t)
 
 	} else {
 		tmp := "%d文字を超えた文字列が指定されています。"
-		res.Error = fmt.Sprintf(tmp, *max)
+		res.Error = fmt.Sprintf(tmp, max)
 	}
 
-	return &res
+	return res
 }
 

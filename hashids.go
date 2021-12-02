@@ -56,7 +56,7 @@ func CreateHashids(input []uint32) string {
 	d := hashids.NewData()
 	d.Alphabet = ALPHABET
 	d.MinLength = MIN_LENGTH
-	d.Salt = getSaltInt64(&ut)
+	d.Salt = getSaltInt64(ut)
 
 	num := make([]int64, 1)
 	num[0] = *sumUint32(input) + ut
@@ -86,8 +86,8 @@ func sumUint32(input []uint32) *int64 {
 // return::string => Sha256文字列
 // remark => unsafe使用
 /////////////////////////////////////////
-func getSaltInt64(input *int64) string {
-	str := strconv.FormatInt(*input, 10)
+func getSaltInt64(input int64) string {
+	str := strconv.FormatInt(input, 10)
 	// hash := sha256.Sum256([]byte(str))
 	hash := sha256.Sum256(*(*[]byte)(unsafe.Pointer(&str)))
 
