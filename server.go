@@ -24,9 +24,9 @@ const (
 // param::Source => 変換元の文字列
 /////////////////////////////////////////
 type HashSet struct {
-	Error   string `json:"Error"`
-	Hashids string `json:"Hashids"`
-	Source  string `json:"Source"`
+	Error   string `json:"error"`
+	Hashids string `json:"hashids"`
+	Source  string `json:"source"`
 }
 
 // summary => 待ち受けるサーバのルーターを定義します
@@ -61,6 +61,7 @@ func getSingleHashids(c *gin.Context) {
 
 		res = nil
 		c.Abort()
+		return
 	}
 
 	res[0] = *getResponse(&max, str)
@@ -95,6 +96,7 @@ func getMultiHashids(c *gin.Context) {
 
 		t = nil
 		c.Abort()
+		return
 	}
 
 	res := make([]HashSet, len(strs))
