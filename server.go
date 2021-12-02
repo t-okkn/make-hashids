@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,7 +42,7 @@ func SetupRouter() *gin.Engine {
 	router.POST("/hashids", getMultiHashids)
 	router.POST("/hashids/max/:max", getMultiHashids)
 
-	 return router
+	return router
 }
 
 // summary => 単一の要求に対してレスポンスを返します
@@ -87,6 +88,7 @@ func getMultiHashids(c *gin.Context) {
 
 		if len(strs) < 1 {
 			t[0].Error = "コンテンツが存在しません。"
+
 		} else if len(strs) > LIMIT_CONTENTS {
 			s := "要求コンテンツが%d件を超えています。"
 			t[0].Error = fmt.Sprintf(s, LIMIT_CONTENTS)
@@ -130,31 +132,38 @@ func getMaxValue(maxStr string) int {
 		// 上限値より大きい値が入っている場合、強制的に上限値
 		max = LIMIT_MAX
 	}
-	
+
 	// 基本的に変換元文字列長の最大値の指定自由度は低い
 	return max
 }
 
 // summary => レスポンスとして返す構造体を生成します
-// param::max => [p] 最大値を示すポインタ
+// param::max => 最大値
 // param::input => 変換元の文字列
-// return::*HashSet => [p] レスポンス用のHashSet構造体
+// return::HashSet => HashSet構造体
 /////////////////////////////////////////
 func getResponse(max int, input string) HashSet {
-	res := HashSet{}
-	res.Source = input
+	res := HashSet{
+		Source:  input,
+		Hashids: "",
+		Error:   "",
+	}
 
 	// max「以下」か（境界値バグテストしっかり）
 	if len([]rune(input)) <= max {
 		// Hashids生成
-		t := Str2Uints(input)
-		res.Hashids = CreateHashids(t)
+		h := EncodeToHashids(input)
+
+		if h == "" {
+			res.Error = "文字列からHashidsへの変換に失敗しました"
+		} else {
+			res.Hashids = h
+		}
 
 	} else {
-		tmp := "%d文字を超えた文字列が指定されています。"
-		res.Error = fmt.Sprintf(tmp, max)
+		t := "%d文字を超えた文字列が指定されています。"
+		res.Error = fmt.Sprintf(t, max)
 	}
 
 	return res
 }
-

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"strconv"
-	"time"
 	"encoding/binary"
 	"encoding/hex"
 	"crypto/sha256"
+	"strings"
+
 	"github.com/speps/go-hashids"
 
 	"unsafe"
@@ -13,84 +13,107 @@ import (
 
 const (
 	// Hashidsに使用する文字列
-	ALPHABET string = "ABCDEFGHJKLMNPQRSTUVWXY0123456789"
+	ALPHABET string = "abcdefghkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXY0123456789"
 
 	// Hashidsの最低文字列長
-	MIN_LENGTH int = 8
+	MIN_LENGTH int = 4
 )
 
-// summary => 文字列を一文字ずつ数値に変換します
-// param::input => 変換する入力値
-// return::[]uint32 => inputに対する変換後の数値
+
+// summary => 文字列をHashidsにします
+// param::input => Hashidsを作成する値
+// return::string => Hashids
 /////////////////////////////////////////
-func Str2Uints(input string) []uint32 {
-	res := make([]uint32, len([]rune(input)))
+func EncodeToHashids(input string) string {
+	// hash := sha256.Sum256([]byte(str))
+	hash := sha256.Sum256(*(*[]byte)(unsafe.Pointer(&input)))
+
+	d := hashids.NewData()
+	d.Alphabet = ALPHABET
+	d.MinLength = MIN_LENGTH
+	d.Salt = hex.EncodeToString(hash[:])
+
+	hid, err := hashids.NewWithData(d)
+	if err != nil {
+		return ""
+	}
+
+	if res, err := hid.EncodeInt64(stringToInt64(input)); err != nil {
+		return ""
+	} else {
+		return res
+	}
+}
+
+// summary => Hashidsを文字列に戻します
+// param::input => Hashids
+// return::string => 文字列
+/////////////////////////////////////////
+func DecodeToString(input string) string {
+	hid, err := hashids.New()
+	if err != nil {
+		return ""
+	}
+
+	arr, err := hid.DecodeInt64WithError(input)
+	if err != nil {
+		return ""
+	}
+
+	return int64ToString(arr)
+}
+
+// summary => 文字列を数字のスライスに変換します
+// param::input => 変換する入力値
+// return::[]int64 => inputに対する変換後のスライス
+/////////////////////////////////////////
+func stringToInt64(input string) []int64 {
+	res := make([]int64, len([]rune(input)))
 	count := 0
 
-	// 各文字をbyteスライスに変換
 	for _, val := range input {
-		chr := []byte(string(val))
-		length := len(chr)
-
-		if length < 4 {
-			for i := 0; i < 4-length; i++ {
-				chr = append(chr, 0)
-			}
+		// 各文字をbyteスライスに変換
+		chr := make([]byte, 8)
+		for i, b := range []byte(string(val)) {
+			chr[i] = b
 		}
 
-		// byteスライスをUint32に変換
-		res[count] = binary.LittleEndian.Uint32(chr)
+		// byteスライスをUint64に変換
+		istr := binary.LittleEndian.Uint64(chr)
+
+		// Uint64をInt64にキャスト
+		// UTF-8はUint32内に収まるので、エラーはありえない
+		res[count] = int64(istr)
 		count += 1
 	}
 
 	return res
 }
 
-// summary => Hashidsを作成します
-// param::input => Hashidsを作成する値
-// return::string => Hashids
+// summary => 数字のスライスを文字列に変換します
+// param::input => 変換する入力値
+// return::string => inputに対する変換後の文字列
 /////////////////////////////////////////
-func CreateHashids(input []uint32) string {
-	ut := time.Now().UnixNano() / int64(time.Microsecond)
-
-	d := hashids.NewData()
-	d.Alphabet = ALPHABET
-	d.MinLength = MIN_LENGTH
-	d.Salt = getSaltInt64(ut)
-
-	num := make([]int64, 1)
-	num[0] = *sumUint32(input) + ut
-
-	hid, _ := hashids.NewWithData(d)
-	res, _ := hid.EncodeInt64(num)
-
-	return res
-}
-
-// summary => uint32のスライスのすべての値を足し合わせます
-// param::input => 足し合わせるスライス
-// return::*int64 => [p] 合計値
-/////////////////////////////////////////
-func sumUint32(input []uint32) *int64 {
-	var total int64 = 0
+func int64ToString(input []int64) string {
+	var sb strings.Builder
+	sb.Grow(len(input))
 
 	for _, val := range input {
-		total += int64(val)
+		// 各数字をbyteスライスに変換
+		chr := make([]byte, binary.MaxVarintLen64)
+		binary.LittleEndian.PutUint64(chr, uint64(val))
+
+		// byteスライスから不要な0を切り詰める
+		pos := 0
+		for i, v := range chr {
+			if v == byte(0) {
+				pos = i
+				break
+			}
+		}
+
+		sb.Write(chr[:pos])
 	}
 
-	return &total
+	return sb.String()
 }
-
-// summary => Int64の入力値に対するSha256を文字列で導出します
-// param::input => [p] Int64の入力値
-// return::string => Sha256文字列
-// remark => unsafe使用
-/////////////////////////////////////////
-func getSaltInt64(input int64) string {
-	str := strconv.FormatInt(input, 10)
-	// hash := sha256.Sum256([]byte(str))
-	hash := sha256.Sum256(*(*[]byte)(unsafe.Pointer(&str)))
-
-	return hex.EncodeToString(hash[:])
-}
-
