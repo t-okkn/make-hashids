@@ -6,7 +6,7 @@ import (
 	"crypto/sha256"
 	"strings"
 
-	"github.com/speps/go-hashids"
+	hashids "github.com/speps/go-hashids"
 
 	"unsafe"
 )
@@ -25,20 +25,34 @@ const (
 // return::string => Hashids
 /////////////////////////////////////////
 func EncodeToHashids(input string) string {
-	// hash := sha256.Sum256([]byte(str))
-	hash := sha256.Sum256(*(*[]byte)(unsafe.Pointer(&input)))
-
-	d := hashids.NewData()
-	d.Alphabet = ALPHABET
-	d.MinLength = MIN_LENGTH
-	d.Salt = hex.EncodeToString(hash[:])
-
-	hid, err := hashids.NewWithData(d)
+	hid, err := getHashidsObject(input)
 	if err != nil {
 		return ""
 	}
 
 	if res, err := hid.EncodeInt64(stringToInt64(input)); err != nil {
+		return ""
+	} else {
+		return res
+	}
+}
+
+// summary => 不可逆なHashidsを取得します
+// param::input => Hashidsを作成する値
+// return::string => Hashids
+/////////////////////////////////////////
+func GetShortHashids(input string) string {
+	hid, err := getHashidsObject(input)
+	if err != nil {
+		return ""
+	}
+
+	var num int64 = 0
+	for _, i := range stringToInt64(input) {
+		num += i
+	}
+
+	if res, err := hid.EncodeInt64([]int64{num}); err != nil {
 		return ""
 	} else {
 		return res
@@ -116,5 +130,22 @@ func int64ToString(input []int64) string {
 	}
 
 	return sb.String()
+}
+
+// summary => HashIDオブジェクトを取得します
+// param::input => Hashidsを作成する値
+// return::*go-hashids.HashID => HashIDオブジェクト
+// return::error => エラー
+/////////////////////////////////////////
+func getHashidsObject(input string) (*hashids.HashID, error) {
+	// hash := sha256.Sum256([]byte(str))
+	hash := sha256.Sum256(*(*[]byte)(unsafe.Pointer(&input)))
+
+	d := hashids.NewData()
+	d.Alphabet = ALPHABET
+	d.MinLength = MIN_LENGTH
+	d.Salt = hex.EncodeToString(hash[:])
+
+	return hashids.NewWithData(d)
 }
 

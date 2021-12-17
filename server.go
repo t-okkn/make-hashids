@@ -113,7 +113,7 @@ func getMultiHashids(c *gin.Context) {
 
 // summary => 変換元文字列長の最大値を導出します
 // param::maxStr => Paramからの流入値
-// return::string => 最大値
+// return::int => 最大値
 /////////////////////////////////////////
 func getMaxValue(maxStr string) int {
 	max, err := strconv.Atoi(maxStr)
@@ -152,7 +152,7 @@ func getResponse(max int, input string) HashSet {
 	// max「以下」か（境界値バグテストしっかり）
 	if len([]rune(input)) <= max {
 		// Hashids生成
-		h := EncodeToHashids(input)
+		h := GetShortHashids(input)
 
 		if h == "" {
 			res.Error = "文字列からHashidsへの変換に失敗しました"
