@@ -53,7 +53,7 @@ func getSingleHashids(c *gin.Context) {
 	max := getMaxValue(maxprm)
 
 	res := make([]HashSet, 1)
-	str := c.DefaultQuery("string", "")
+	str := c.DefaultQuery("source", "")
 
 	// 単一要求時はエラーがあれば400とする
 	if str == "" {
@@ -82,7 +82,7 @@ func getMultiHashids(c *gin.Context) {
 	maxprm := c.Param("max")
 	max := getMaxValue(maxprm)
 
-	strs := c.PostFormArray("strings[]")
+	strs := c.PostFormArray("sources[]")
 	if len(strs) < 1 || len(strs) > LIMIT_CONTENTS {
 		t := make([]HashSet, 1)
 
@@ -167,3 +167,4 @@ func getResponse(max int, input string) HashSet {
 
 	return res
 }
+
