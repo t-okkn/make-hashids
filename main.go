@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	// "nginx/unit"
 )
 
 const LISTEN_PORT string = ":8501"
@@ -13,8 +12,7 @@ var (
 	Revision string
 )
 
-// summary => main関数（サーバを開始します）
-/////////////////////////////////////////
+// <summary>: main関数（サーバを開始します）
 func main() {
 	flag.Parse()
 
@@ -23,6 +21,6 @@ func main() {
 		return
 	}
 
-	// unit.ListenAndServe(LISTEN_PORT, SetupRouter())
 	SetupRouter().Run(LISTEN_PORT)
 }
+

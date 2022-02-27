@@ -19,21 +19,15 @@ const (
 	DEFAULT_MAX int = 256
 )
 
-// summary => Response内容について定義した構造体
-// param::Error => エラー内容
-// param::Hashids => Hashids
-// param::Source => 変換元の文字列
-/////////////////////////////////////////
+// <summary>: Response内容について定義した構造体
 type HashSet struct {
 	Error   string `json:"error"`
 	Hashids string `json:"hashids"`
 	Source  string `json:"source"`
 }
 
-// summary => 待ち受けるサーバのルーターを定義します
-// return::*gin.Engine =>
-// remark => httpHandlerを受け取る関数にそのまま渡せる
-/////////////////////////////////////////
+// <summary>: 待ち受けるサーバのルーターを定義します
+// <remark>: httpHandlerを受け取る関数にそのまま渡せる
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
 	v1 := router.Group("/v1")
@@ -46,9 +40,7 @@ func SetupRouter() *gin.Engine {
 	return router
 }
 
-// summary => 単一の要求に対してレスポンスを返します
-// param::c => [p] gin.Context構造体
-/////////////////////////////////////////
+// <summary>: 単一の要求に対してレスポンスを返します
 func getSingleHashids(c *gin.Context) {
 	maxprm := c.Param("max")
 	max := getMaxValue(maxprm)
@@ -76,9 +68,7 @@ func getSingleHashids(c *gin.Context) {
 	res = nil
 }
 
-// summary => 複数の要求に対してレスポンスを返します
-// param::c => [p] gin.Context構造体
-/////////////////////////////////////////
+// <summary>: 複数の要求に対してレスポンスを返します
 func getMultiHashids(c *gin.Context) {
 	maxprm := c.Param("max")
 	max := getMaxValue(maxprm)
@@ -112,10 +102,7 @@ func getMultiHashids(c *gin.Context) {
 	res = nil
 }
 
-// summary => 変換元文字列長の最大値を導出します
-// param::maxStr => Paramからの流入値
-// return::int => 最大値
-/////////////////////////////////////////
+// <summary>: 変換元文字列長の最大値を導出します
 func getMaxValue(maxStr string) int {
 	max, err := strconv.Atoi(maxStr)
 
@@ -138,11 +125,7 @@ func getMaxValue(maxStr string) int {
 	return max
 }
 
-// summary => レスポンスとして返す構造体を生成します
-// param::max => 最大値
-// param::input => 変換元の文字列
-// return::HashSet => HashSet構造体
-/////////////////////////////////////////
+// <summary>: レスポンスとして返す構造体を生成します
 func getResponse(max int, input string) HashSet {
 	res := HashSet{
 		Source:  input,

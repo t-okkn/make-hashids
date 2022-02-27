@@ -20,10 +20,7 @@ const (
 )
 
 
-// summary => 文字列をHashidsにします
-// param::input => Hashidsを作成する値
-// return::string => Hashids
-/////////////////////////////////////////
+// <summary>: 文字列をHashidsにします
 func EncodeToHashids(input string) string {
 	hid, err := getHashidsObject(input)
 	if err != nil {
@@ -37,10 +34,7 @@ func EncodeToHashids(input string) string {
 	}
 }
 
-// summary => 不可逆なHashidsを取得します
-// param::input => Hashidsを作成する値
-// return::string => Hashids
-/////////////////////////////////////////
+// <summary>: 不可逆なHashidsを取得します
 func GetShortHashids(input string) string {
 	hid, err := getHashidsObject(input)
 	if err != nil {
@@ -59,10 +53,7 @@ func GetShortHashids(input string) string {
 	}
 }
 
-// summary => Hashidsを文字列に戻します
-// param::input => Hashids
-// return::string => 文字列
-/////////////////////////////////////////
+// <summary>: Hashidsを文字列に戻します
 func DecodeToString(input string) string {
 	hid, err := hashids.New()
 	if err != nil {
@@ -77,10 +68,7 @@ func DecodeToString(input string) string {
 	return int64ToString(arr)
 }
 
-// summary => 文字列を数字のスライスに変換します
-// param::input => 変換する入力値
-// return::[]int64 => inputに対する変換後のスライス
-/////////////////////////////////////////
+// <summary>: 文字列を数字のスライスに変換します
 func stringToInt64(input string) []int64 {
 	res := make([]int64, len([]rune(input)))
 	count := 0
@@ -104,10 +92,7 @@ func stringToInt64(input string) []int64 {
 	return res
 }
 
-// summary => 数字のスライスを文字列に変換します
-// param::input => 変換する入力値
-// return::string => inputに対する変換後の文字列
-/////////////////////////////////////////
+// <summary>: 数字のスライスを文字列に変換します
 func int64ToString(input []int64) string {
 	var sb strings.Builder
 	sb.Grow(len(input))
@@ -132,11 +117,7 @@ func int64ToString(input []int64) string {
 	return sb.String()
 }
 
-// summary => HashIDオブジェクトを取得します
-// param::input => Hashidsを作成する値
-// return::*go-hashids.HashID => HashIDオブジェクト
-// return::error => エラー
-/////////////////////////////////////////
+// <summary>: HashIDオブジェクトを取得します
 func getHashidsObject(input string) (*hashids.HashID, error) {
 	// hash := sha256.Sum256([]byte(str))
 	hash := sha256.Sum256(*(*[]byte)(unsafe.Pointer(&input)))
