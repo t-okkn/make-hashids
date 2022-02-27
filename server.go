@@ -36,11 +36,12 @@ type HashSet struct {
 /////////////////////////////////////////
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
+	v1 := router.Group("/v1")
 
-	router.GET("/hashids", getSingleHashids)
-	router.GET("/hashids/max/:max", getSingleHashids)
-	router.POST("/hashids", getMultiHashids)
-	router.POST("/hashids/max/:max", getMultiHashids)
+	v1.GET("/hashids", getSingleHashids)
+	v1.GET("/hashids/max/:max", getSingleHashids)
+	v1.POST("/hashids", getMultiHashids)
+	v1.POST("/hashids/max/:max", getMultiHashids)
 
 	return router
 }
