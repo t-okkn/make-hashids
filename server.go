@@ -50,10 +50,9 @@ func getSingleHashids(c *gin.Context) {
 
 	// 単一要求時はエラーがあれば400とする
 	if str == "" {
-		res[0].Error = "文字列が読み取れませんでした。"
-		c.JSON(http.StatusBadRequest, res)
+		res[0].Error = "文字列が読み取れませんでした"
 
-		res = nil
+		c.JSON(http.StatusBadRequest, res)
 		c.Abort()
 		return
 	}
@@ -64,42 +63,46 @@ func getSingleHashids(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, res)
 	}
-
-	res = nil
 }
 
 // <summary>: 複数の要求に対してレスポンスを返します
 func getMultiHashids(c *gin.Context) {
 	maxprm := c.Param("max")
 	max := getMaxValue(maxprm)
+	sources := make([]string, 0, LIMIT_CONTENTS)
 
-	strs := c.PostFormArray("sources[]")
-	if len(strs) < 1 || len(strs) > LIMIT_CONTENTS {
-		t := make([]HashSet, 1)
+	errset := make([]HashSet, 1)
+	errset[0] = HashSet{}
 
-		if len(strs) < 1 {
-			t[0].Error = "コンテンツが存在しません。"
+	if err := c.ShouldBindJSON(&sources); err != nil {
+		errset[0].Error = "無効なリクエストです"
 
-		} else if len(strs) > LIMIT_CONTENTS {
-			s := "要求コンテンツが%d件を超えています。"
-			t[0].Error = fmt.Sprintf(s, LIMIT_CONTENTS)
-		}
-
-		c.JSON(http.StatusBadRequest, t)
-
-		t = nil
+		c.JSON(http.StatusBadRequest, errset)
 		c.Abort()
 		return
 	}
 
-	res := make([]HashSet, len(strs))
-	for i, str := range strs {
-		res[i] = getResponse(max, str)
+	if len(sources) < 1 || len(sources) > LIMIT_CONTENTS {
+		if len(sources) < 1 {
+			errset[0].Error = "コンテンツが存在しません"
+
+		} else if len(sources) > LIMIT_CONTENTS {
+			s := "要求コンテンツが%d件を超えています"
+			errset[0].Error = fmt.Sprintf(s, LIMIT_CONTENTS)
+		}
+
+		c.JSON(http.StatusBadRequest, errset)
+		c.Abort()
+		return
+	}
+
+	res := make([]HashSet, len(sources))
+	for i, source := range sources {
+		res[i] = getResponse(max, source)
 	}
 
 	// 複数要求時はエラーがあっても200で返す
 	c.JSON(http.StatusOK, res)
-	res = nil
 }
 
 // <summary>: 変換元文字列長の最大値を導出します
