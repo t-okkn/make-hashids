@@ -1,9 +1,9 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
-	"crypto/sha256"
 	"strings"
 
 	hashids "github.com/speps/go-hashids"
@@ -19,6 +19,13 @@ const (
 	MIN_LENGTH int = 4
 )
 
+// <summary>: Saltを取得します
+func GetSalt(input string) string {
+	// hash := sha256.Sum256([]byte(str))
+	hash := sha256.Sum256(*(*[]byte)(unsafe.Pointer(&input)))
+
+	return hex.EncodeToString(hash[:])
+}
 
 // <summary>: 文字列をHashidsにします
 func EncodeToHashids(input string) string {
@@ -41,12 +48,12 @@ func GetShortHashids(input string) string {
 		return ""
 	}
 
-	var num int64 = 0
+	num := []int64{0}
 	for _, i := range stringToInt64(input) {
-		num += i
+		num[0] += i
 	}
 
-	if res, err := hid.EncodeInt64([]int64{num}); err != nil {
+	if res, err := hid.EncodeInt64(num); err != nil {
 		return ""
 	} else {
 		return res
@@ -54,8 +61,12 @@ func GetShortHashids(input string) string {
 }
 
 // <summary>: Hashidsを文字列に戻します
-func DecodeToString(input string) string {
-	hid, err := hashids.New()
+func DecodeToString(input, salt string) string {
+	d := hashids.NewData()
+	d.Alphabet = ALPHABET
+	d.Salt = salt
+
+	hid, err := hashids.NewWithData(d)
 	if err != nil {
 		return ""
 	}
@@ -119,14 +130,10 @@ func int64ToString(input []int64) string {
 
 // <summary>: HashIDオブジェクトを取得します
 func getHashidsObject(input string) (*hashids.HashID, error) {
-	// hash := sha256.Sum256([]byte(str))
-	hash := sha256.Sum256(*(*[]byte)(unsafe.Pointer(&input)))
-
 	d := hashids.NewData()
 	d.Alphabet = ALPHABET
 	d.MinLength = MIN_LENGTH
-	d.Salt = hex.EncodeToString(hash[:])
+	d.Salt = GetSalt(input)
 
 	return hashids.NewWithData(d)
 }
-
